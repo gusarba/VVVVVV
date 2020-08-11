@@ -12,8 +12,9 @@ The port is far from perfect and there's still a lot of room for improvement, bu
 Controls
 --------
 
-A button                                  | Flip/Accept  
+Input | Action
 --- | ---
+A button                                  | Flip/Accept  
 B button                                  | Exit/Cancel   
 START button                              | Pause         
 Dpad left / Analog stick left             | Move character/cursor to the left  
