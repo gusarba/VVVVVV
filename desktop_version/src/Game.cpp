@@ -4515,7 +4515,7 @@ void Game::loadstats()
     }
     if (controllerButton_map.size() < 1)
     {
-        controllerButton_map.push_back(SDL_CONTROLLER_BUTTON_Y);
+        controllerButton_map.push_back(SDL_CONTROLLER_BUTTON_START);
     }
     if (controllerButton_esc.size() < 1)
     {

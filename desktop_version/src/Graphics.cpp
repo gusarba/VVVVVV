@@ -8,6 +8,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef DREAMCAST
+extern "C"
+{
+#include "SDL_inprint.h"
+}
+#endif
+
 void Graphics::init()
 {
     grphx.init();
@@ -1232,12 +1239,28 @@ bool Graphics::Hitest(SDL_Surface* surface1, point p1, SDL_Surface* surface2, po
         {
             for(int y = r3_bottom; y < r3_top; y++)
             {
-                Uint32 pixel1 = ReadPixel(surface1 , x - p1.x, y - p1.y);
-                Uint32 pixel2 = ReadPixel(surface2 , x - p2.x, y - p2.y);
+              // TODO: Check that both surfaces use the same pixel format
+              if (surface1->format->BytesPerPixel == 4)
+              {
+                Uint32 pixel1 = ReadPixel(surface1, x - p1.x, y - p1.y);
+                Uint32 pixel2 = ReadPixel(surface2, x - p2.x, y - p2.y);
                 if ((pixel1 & 0x000000FF) && (pixel2 & 0x000000FF))
                 {
-                    return true;
+                  return true;
                 }
+              }
+              else
+              {
+                Uint16 pixel1 = ReadPixel(surface1, x - p1.x, y - p1.y);
+                Uint16 pixel2 = ReadPixel(surface2, x - p2.x, y - p2.y);
+                Uint8 notused, alpha1, alpha2;
+                SDL_GetRGBA(pixel1, surface1->format, &notused, &notused, &notused, &alpha1);
+                SDL_GetRGBA(pixel2, surface2->format, &notused, &notused, &notused, &alpha2);
+                if (alpha1 && alpha2)                
+                {
+                  return true;
+                }
+              }
             }
         }
         return false;
@@ -2593,7 +2616,7 @@ void Graphics::drawtowerbackground()
 }
 
 void Graphics::setcol( int t )
-{
+{  
 	int temp;
 
 	//Setup predefinied colours as per our zany palette
@@ -2601,7 +2624,8 @@ void Graphics::setcol( int t )
 	{
 		//Player Normal
 	case 0:
-		ct.colour = getRGB(160- help.glow/2 - (fRandom()*20), 200- help.glow/2, 220 - help.glow);
+		//ct.colour = getRGB(160- help.glow/2 - (fRandom()*20), 200- help.glow/2, 220 - help.glow);
+    ct.colour = getRGB(160 - help.glow / 2, 200 - help.glow / 2, 220 - help.glow);
 		break;
 		//Player Hurt
 	case 1:
@@ -2956,6 +2980,9 @@ void Graphics::screenshake()
 
 void Graphics::render()
 {
+
+  Uint32 time = SDL_GetTicks();
+
 	if(screenbuffer == NULL)
 	{
 		return;
@@ -2981,6 +3008,16 @@ void Graphics::render()
 		//SDL_BlitSurface(backBuffer, NULL, screenbuffer, &rect);
 		screenbuffer->UpdateScreen( backBuffer, &rect);
 	}
+
+  // GUSARBA: Uncomment these to get performance stats
+  /*
+  time = SDL_GetTicks() - time;  
+  char tmprt[80] = {0};
+  sprintf(tmprt, "G::r %d\0", time);
+  prepare_inline_font();
+  incolor(0xFF0000, 0x333333);
+  inprint(screenbuffer->m_window, tmprt, 10, 34);
+  */
 }
 
 void Graphics::bigrprint(int x, int y, std::string& t, int r, int g, int b, bool cen, float sc)
@@ -3043,13 +3080,15 @@ void Graphics::drawtele(int x, int y, int t, int c)
 
 	SDL_Rect telerect;
 	setRect(telerect, x , y, tele_rect.w, tele_rect.h );
-	BlitSurfaceColoured(tele[0], NULL, backBuffer, &telerect, ct);
+	//BlitSurfaceColoured(tele[0], NULL, backBuffer, &telerect, ct);
+	BlitSurfaceColoured(tele[0], NULL, backBuffer, &telerect, ct, 0xFFFF);
 
 	setcol(c);
 	if (t > 9) t = 8;
 	if (t < 0) t = 0;
 
-	BlitSurfaceColoured(tele[t], NULL, backBuffer, &telerect, ct);
+	//BlitSurfaceColoured(tele[t], NULL, backBuffer, &telerect, ct);
+	BlitSurfaceColoured(tele[t], NULL, backBuffer, &telerect, ct, 0xFFFF);
 }
 
 Uint32 Graphics::getRGBA(Uint8 r, Uint8 g, Uint8 b, Uint8 a)

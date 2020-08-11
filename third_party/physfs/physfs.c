@@ -843,7 +843,7 @@ static DirHandle *tryOpenDir(PHYSFS_Io *io, const PHYSFS_Archiver *funcs,
 {
     DirHandle *retval = NULL;
     void *opaque = NULL;
-
+    
     if (io != NULL)
         BAIL_IF_ERRPASS(!io->seek(io, 0), NULL);
 
@@ -882,7 +882,7 @@ static DirHandle *openDirectory(PHYSFS_Io *io, const char *d, int forWriting)
         /* file doesn't exist, etc? Just fail out. */
         PHYSFS_Stat statbuf;
         BAIL_IF_ERRPASS(!__PHYSFS_platformStat(d, &statbuf, 1), NULL);
-
+        
         /* DIR gets first shot (unlike the rest, it doesn't deal with files). */
         if (statbuf.filetype == PHYSFS_FILETYPE_DIRECTORY)
         {
@@ -890,12 +890,12 @@ static DirHandle *openDirectory(PHYSFS_Io *io, const char *d, int forWriting)
             if (retval || claimed)
                 return retval;
         } /* if */
-
+    
         io = __PHYSFS_createNativeIo(d, forWriting ? 'w' : 'r');
         BAIL_IF_ERRPASS(!io, NULL);
         created_io = 1;
     } /* if */
-
+    
     ext = find_filename_extension(d);
     if (ext != NULL)
     {
@@ -1034,14 +1034,14 @@ static DirHandle *createDirHandle(PHYSFS_Io *io, const char *newDir,
             goto badDirHandle;
         mountPoint = tmpmntpnt;  /* sanitized version. */
     } /* if */
-
+    
     dirHandle = openDirectory(io, newDir, forWriting);
     GOTO_IF_ERRPASS(!dirHandle, badDirHandle);
-
+    
     dirHandle->dirName = (char *) allocator.Malloc(strlen(newDir) + 1);
     GOTO_IF(!dirHandle->dirName, PHYSFS_ERR_OUT_OF_MEMORY, badDirHandle);
     strcpy(dirHandle->dirName, newDir);
-
+    
     if ((mountPoint != NULL) && (*mountPoint != '\0'))
     {
         dirHandle->mountPoint = (char *)allocator.Malloc(strlen(mountPoint)+2);
@@ -1050,7 +1050,7 @@ static DirHandle *createDirHandle(PHYSFS_Io *io, const char *newDir,
         strcpy(dirHandle->mountPoint, mountPoint);
         strcat(dirHandle->mountPoint, "/");
     } /* if */
-
+    
     __PHYSFS_smallFree(tmpmntpnt);
     return dirHandle;
 
@@ -1692,12 +1692,12 @@ static int doMount(PHYSFS_Io *io, const char *fname,
     DirHandle *i;
 
     BAIL_IF(!fname, PHYSFS_ERR_INVALID_ARGUMENT, 0);
-
+    
     if (mountPoint == NULL)
         mountPoint = "/";
 
     __PHYSFS_platformGrabMutex(stateLock);
-
+    
     for (i = searchPath; i != NULL; i = i->next)
     {
         /* already in search path? */
@@ -1705,10 +1705,10 @@ static int doMount(PHYSFS_Io *io, const char *fname,
             BAIL_MUTEX_ERRPASS(stateLock, 1);
         prev = i;
     } /* for */
-
+    
     dh = createDirHandle(io, fname, mountPoint, 0);
     BAIL_IF_MUTEX_ERRPASS(!dh, stateLock, 0);
-
+    
     if (appendToPath)
     {
         if (prev == NULL)

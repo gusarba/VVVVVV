@@ -10,6 +10,12 @@
 
 #include "MakeAndPlay.h"
 
+#ifdef DREAMCAST
+extern "C" {
+#include <SDL_inprint.h>
+}
+#endif
+
 extern scriptclass script;
 
 int tr;
@@ -1398,7 +1404,7 @@ void gamecompleterender2()
 void gamerender()
 {
 
-
+    Uint32 time = SDL_GetTicks();
 
     if(!game.blackout)
     {
@@ -1420,6 +1426,7 @@ void gamerender()
             graphics.drawmap();
         }
 
+        time = SDL_GetTicks() - time;
 
         if(!game.completestop)
         {
@@ -1451,6 +1458,7 @@ void gamerender()
 
         graphics.drawentities();
     }
+
 
     if(map.extrarow==0 || (map.custommode && map.roomname!=""))
     {
@@ -1743,6 +1751,16 @@ void gamerender()
     {
         graphics.render();
     }
+
+    // GUSARBA: Uncomment these to get performance debug stats
+    /*
+    char tmprt[80] = {0};
+    sprintf(tmprt, "gamerender %d\0", time);
+    prepare_inline_font();
+    incolor(0xFF0000, 0x333333);
+    inprint(graphics.screenbuffer->m_window, tmprt, 10, 42);
+    */
+
 }
 
 void maprender()

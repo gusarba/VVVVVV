@@ -72,6 +72,9 @@
 #elif defined(unix) || defined(__unix__)
 #  define PHYSFS_PLATFORM_UNIX 1
 #  define PHYSFS_PLATFORM_POSIX 1
+#elif defined(DREAMCAST)
+#  define PHYSFS_PLATFORM_DREAMCAST 1
+//#  define PHYSFS_NO_CDROM_SUPPORT 1
 #else
 #  error Unknown platform.
 #endif

@@ -4266,6 +4266,9 @@ void entityclass::applyfriction( int t, float xrate, float yrate )
 
 void entityclass::updateentitylogic( int t )
 {
+  // GUSARBA: Sanity check
+  if (t >= entities.size()) return;
+
     entities[t].oldxp = entities[t].xp;
     entities[t].oldyp = entities[t].yp;
 

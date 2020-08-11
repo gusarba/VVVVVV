@@ -30,6 +30,10 @@ int mkdir(char* path, int mode)
 #include <unistd.h>
 #include <dirent.h>
 #define MAX_PATH PATH_MAX
+#elif defined(DREAMCAST)
+#define MAX_PATH 255
+#define VNEEDS_MIGRATION 0
+#include "FileSystemUtils_dreamcast.h"
 #endif
 
 char saveDir[MAX_PATH];
@@ -99,6 +103,7 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath)
 		strcpy(output, PHYSFS_getBaseDir());
 		strcat(output, "data.zip");
 	}
+  printf("mount %s\n", output);
 	if (!PHYSFS_mount(output, NULL, 1))
 	{
 		puts("Error: data.zip missing!");
@@ -106,6 +111,8 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath)
 		puts("Grab it from your purchased copy of the game,");
 		puts("or get it from the free Make and Play Edition.");
 
+    // GUSARBA: DISABLED ATM
+    /*
 		SDL_ShowSimpleMessageBox(
 			SDL_MESSAGEBOX_ERROR,
 			"data.zip missing!",
@@ -114,15 +121,19 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath)
 			"\nor get it from the free Make and Play Edition.",
 			NULL
 		);
+    */
 		return 0;
 	}
 
 	strcpy(output, PHYSFS_getBaseDir());
 	strcpy(output, "gamecontrollerdb.txt");
+  // GUSARBA: DISABLED ATM
+  /*
 	if (SDL_GameControllerAddMappingsFromFile(output) < 0)
 	{
 		printf("gamecontrollerdb.txt not found!\n");
 	}
+  */
 	return 1;
 }
 
@@ -147,6 +158,7 @@ void FILESYSTEM_loadFileToMemory(const char *name, unsigned char **mem,
 	PHYSFS_File *handle = PHYSFS_openRead(name);
 	if (handle == NULL)
 	{
+    printf("FILESYSTEM_loadFileToMemory: %s failed\n", name);
 		return;
 	}
 	PHYSFS_uint32 length = PHYSFS_fileLength(handle);
@@ -178,23 +190,68 @@ bool FILESYSTEM_saveTiXmlDocument(const char *name, TiXmlDocument *doc)
 	/* TiXmlDocument.SaveFile doesn't account for Unicode paths, PHYSFS does */
 	TiXmlPrinter printer;
 	doc->Accept(&printer);
+#ifdef DREAMCAST
+  // Remove "saves/" directory from the string. Get only the file name
+  // because ramfs does not support directories
+  char tmp[32] = {0};
+  memset(tmp, '\0', 32);
+  for (int i = strlen(name); i >= 0; --i) {
+    if (name[i] == '/') {
+      strncat(tmp, &name[i+1], 32);
+      break;
+    }
+  }
+  name = tmp;
+  //printf("name adjusted to %s\n", name);
+#endif
 	PHYSFS_File* handle = PHYSFS_openWrite(name);
 	if (handle == NULL)
 	{
+    //printf("FILESYSTEM_saveTiXmlDocument: %s handle is NULL\n", name);
 		return false;
 	}
 	PHYSFS_writeBytes(handle, printer.CStr(), printer.Size());
 	PHYSFS_close(handle);
+#ifdef DREAMCAST
+  // Dump /ram file into VMU
+  bool ret = PLATFORM_saveToVmu(name);
+  if (ret == false) {
+    // TODO: notify something here
+    return false;
+  }
+#endif
 	return true;
 }
 
 bool FILESYSTEM_loadTiXmlDocument(const char *name, TiXmlDocument *doc)
 {
+#ifdef DREAMCAST
+  //printf("FILESYSTEM_loadTiXmlDocument %s\n", name);
+  // Dump VMU file into /ram
+  bool ret = PLATFORM_loadFromVmu(name);
+  if (ret == false) {
+    //printf("FILESYSTEM_loadTiXmlDocument: Could not load file from VMU\n");
+    return false;
+  }
+  // Remove "saves/" directory from the string. Get only the file name
+  // because ramfs does not support directories
+  char tmp[32] = {0};
+  memset(tmp, '\0', 32);
+  for (int i = strlen(name); i >= 0; --i) {
+    if (name[i] == '/') {
+      strncat(tmp, &name[i+1], 32);
+      break;
+    }
+  }
+  name = tmp;
+  //printf("name adjusted to %s\n", name);
+#endif
 	/* TiXmlDocument.SaveFile doesn't account for Unicode paths, PHYSFS does */
 	unsigned char *mem = NULL;
 	FILESYSTEM_loadFileToMemory(name, &mem, NULL, true);
 	if (mem == NULL)
 	{
+    printf("FILESYSTEM_loadTiXmlDocument: Could not load file to memory\n");
 		return false;
 	}
 	doc->Parse((const char*)mem, NULL, TIXML_ENCODING_UTF8);
@@ -396,6 +453,8 @@ void PLATFORM_migrateSaveData(char* output)
 			PLATFORM_copyFile(oldLocation, newLocation);
 		}
 	} while (FindNextFile(hFind, &findHandle));
+#elif defined(DREAMCAST)
+  // TODO
 #else
 #error See PLATFORM_migrateSaveData
 #endif

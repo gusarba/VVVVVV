@@ -3,6 +3,10 @@
 
 #include <SDL.h>
 
+#ifdef DREAMCAST
+#include "SDL2_stub.h"
+#endif
+
 class Screen
 {
 public:
@@ -26,8 +30,10 @@ public:
 	int stretchMode;
 
 	SDL_Window *m_window;
+#ifndef DREAMCAST
 	SDL_Renderer *m_renderer;
 	SDL_Texture *m_screenTexture;
+#endif
 	SDL_Surface* m_screen;
 
 	SDL_Rect filterSubrect;

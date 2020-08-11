@@ -1,6 +1,6 @@
 #include "Network.h"
 
-#define NUM_BACKENDS 2
+#define NUM_BACKENDS 3
 #define DECLARE_BACKEND(name) \
 	extern int32_t name##_init(); \
 	extern void name##_shutdown(); \
@@ -10,6 +10,7 @@
 	extern void name##_setAchievementProgress(const char *name, int32_t stat);
 DECLARE_BACKEND(STEAM)
 DECLARE_BACKEND(GOG)
+DECLARE_BACKEND(DCNETWORK)
 #undef DECLARE_BACKEND
 
 typedef struct NetworkBackend
@@ -25,7 +26,7 @@ typedef struct NetworkBackend
 
 static NetworkBackend backends[NUM_BACKENDS];
 
-int NETWORK_init()
+int32_t NETWORK_init()
 {
 	int32_t i, any = 0;
 	#define ASSIGN_BACKEND(name, index) \

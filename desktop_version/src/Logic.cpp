@@ -1003,9 +1003,14 @@ void gamelogic()
             {
                 if (!obj.entities[ie].isplatform)
                 {
-                    obj.updateentities(ie);          // Behavioral logic
+                    // GUSARBA: Changed order of function calls to prevent a
+                    // bug when catching the first trinket. 
+                    // This has probably been already fixed in the official 
+                    // repository.
+                    //obj.updateentities(ie);          // Behavioral logic
                     obj.updateentitylogic(ie);       // Basic Physics
                     obj.entitymapcollision(ie);      // Collisions with walls
+                    obj.updateentities(ie);          // Behavioral logic
                 }
             }
 

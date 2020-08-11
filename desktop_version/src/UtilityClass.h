@@ -5,6 +5,10 @@
 #include <vector>
 #include <string>
 
+#ifdef DREAMCAST
+#include "SDL2_stub.h"
+#endif
+
 int ss_toi(std::string _s);
 
 std::vector<std::string> split(const std::string &s, char delim, std::vector<std::string> &elems);

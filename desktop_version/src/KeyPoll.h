@@ -7,6 +7,10 @@
 
 #include "SDL.h"
 
+#ifdef DREAMCAST
+#include "SDL2_stub.h"
+#endif
+
 enum Kybrd
 {
 	KEYBOARD_UP = SDLK_UP,

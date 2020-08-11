@@ -15,6 +15,8 @@
 #define STEAM_LIBRARY "libsteam_api.dylib"
 #elif defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__HAIKU__)
 #define STEAM_LIBRARY "libsteam_api.so"
+#elif defined(DREAMCAST)
+#define STEAM_LIBRARY ""
 #else
 #error STEAM_LIBRARY: Unrecognized platform!
 #endif

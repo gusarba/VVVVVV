@@ -6,7 +6,7 @@
 
 /* Used by UtilityClass::GCString to generate a button list */
 const char *GCChar(SDL_GameControllerButton button)
-{
+{  
 	if (button == SDL_CONTROLLER_BUTTON_A)
 	{
 		return "A";
@@ -196,6 +196,9 @@ bool UtilityClass::intersects( SDL_Rect A, SDL_Rect B )
 
 void UtilityClass::updateglow()
 {
+  // GUSARBA: Uncomment this to remove glow
+  //return;
+
 	slowsine++;
 	if (slowsine >= 64) slowsine = 0;
 

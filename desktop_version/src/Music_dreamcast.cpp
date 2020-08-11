@@ -151,7 +151,7 @@ void *wav_callback(snd_stream_hnd_t hnd, int len, int * actual) {
 int stream_setup(SoundTrack* t) {
   snd_stream_hnd_t shnd = snd_stream_alloc(&wav_callback, SND_STREAM_BUFFER_MAX);
   if (shnd == SND_STREAM_INVALID) {
-    printf("stream_thread: SND_STREAM_INVALID %p\n", t);
+    printf("stream_setup: SND_STREAM_INVALID %p\n", t);
     return -1;
   }
 
@@ -532,6 +532,5 @@ void musicclass::changemusicarea(int x, int y)
 
 void musicclass::playef(int t)
 {
-  //thd_create(1, (void*)stream_thread, (void*)&soundTracks[t]);
   stream_setup((void*)&soundTracks[t]);
 }

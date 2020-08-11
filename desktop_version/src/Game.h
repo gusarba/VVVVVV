@@ -8,6 +8,9 @@
 #include "UtilityClass.h"
 #include "GraphicsUtil.h"
 
+#ifdef DREAMCAST
+#include "SDL2_stub.h"
+#endif
 
 class Game
 {
@@ -309,9 +312,9 @@ public:
     bool customlevelstatsloaded;
 
 
-    std::vector<SDL_GameControllerButton> controllerButton_map;
+    std::vector<SDL_GameControllerButton> controllerButton_map;    
     std::vector<SDL_GameControllerButton> controllerButton_flip;
-    std::vector<SDL_GameControllerButton> controllerButton_esc;
+    std::vector<SDL_GameControllerButton> controllerButton_esc;    
 
     bool skipfakeload;
 };
