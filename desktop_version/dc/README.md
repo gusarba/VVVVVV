@@ -11,12 +11,15 @@ The port is far from perfect and there's still a lot of room for improvement, bu
 
 Controls
 --------
-| A button                                  | Flip/Accept   |
-| B button                                  | Exit/Cancel   |
-| START button                              | Pause         |
-| Dpad left / Analog stick left             | Move character/cursor to the left  |
-| Dpad right / Analog stick right           | Move character/cursor to the right |
-| Dpad up or down / Analog stick up or down | Flip |
+
+A button                                  | Flip/Accept  
+--- | ---
+B button                                  | Exit/Cancel   
+START button                              | Pause         
+Dpad left / Analog stick left             | Move character/cursor to the left  
+Dpad right / Analog stick right           | Move character/cursor to the right 
+Dpad up or down / Analog stick up or down | Flip 
+
 
 How to Build
 ------------
