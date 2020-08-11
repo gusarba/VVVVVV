@@ -9,6 +9,15 @@ The port is far from perfect and there's still a lot of room for improvement, bu
 - All the music system has been changed to use CDDA audio tracks instead of a binary blob file (which cointains Ogg/Vorbis files). Numerous tests were performed streaming and decoding music from the blob, but it was too slow and choppy.
 - The code also includes a quick port to the Dreamcast of the [PhysicsFS library](https://www.icculus.org/physfs/) which the games uses as its file system abstraction.
 
+Controls
+--------
+| A button                                  | Flip/Accept   |
+| B button                                  | Exit/Cancel   |
+| START button                              | Pause         |
+| Dpad left / Analog stick left             | Move character/cursor to the left  |
+| Dpad right / Analog stick right           | Move character/cursor to the right |
+| Dpad up or down / Analog stick up or down | Flip |
+
 How to Build
 ------------
 To build the game you need a working [KallistiOS (KOS)](http://gamedev.allusion.net/softprj/kos/) development environment with some extra tools for development on the Dreamcast, namely [IMG4DC](https://github.com/sizious/img4dc). Under Windows, probably the easiest way to set this up is [DreamSDK](https://www.dreamsdk.org/). You will also need Python 3 and PyOgg to run the script which extracts the audio tracks. Normally, you can use pip to install PyOgg:
