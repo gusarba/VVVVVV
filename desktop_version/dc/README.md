@@ -1,6 +1,6 @@
 Quick port of [Terry Cavanagh's VVVVVV](https://thelettervsixtim.es/) to the Sega Dreamcast game console. This repository is a fork of [the official one](https://github.com/TerryCavanagh/VVVVVV), which was uploaded to celebrate the game's 10th anniversary and contains the source code for the computer and mobile phone versions of the game. The fork was created on April 6th 2020, so newer additions and improvements to the original source are still not reflected here.
 
-The port is far from perfect and there's still a lot of room for improvement, but it is very playable. To develop it, some fundamental changes needed to be made to the original source files. The original structure and code path has been preserved wherever possible, opting to create Dreamcast-specific source files (e.g: main_dreamcast.cpp) where it made more sense, while in other cases opting for a simple ```#ifdef/#endif``` code block. Some characteristics of the port:
+The port is far from perfect and there are still a lot of bugs and room for improvement, but it is very playable. To develop it, some fundamental changes needed to be made to the original source files. The original structure and code path has been preserved wherever possible, opting to create Dreamcast-specific source files (e.g: main_dreamcast.cpp) where it made more sense, while in other cases opting for a simple ```#ifdef/#endif``` code block. Some characteristics of the port:
 
 - Backported all the SDL calls from the 2.0 API to the old 1.2 API. It incluides a simple "SDL2_stub.h" header file with some glue code.
 - Instead of alpha-blending the SDL surfaces, color keying is used, which had a dramatic impact on performance, since all the blitting is done in software by the Dreamcast's SH4 processor.
@@ -8,6 +8,19 @@ The port is far from perfect and there's still a lot of room for improvement, bu
 - Saving and loading to the VMU is implemented, as well as a new small menu screen when booting the game to select which VMU to use (or to not save at all).
 - All the music system has been changed to use CDDA audio tracks instead of a binary blob file (which cointains Ogg/Vorbis files). Numerous tests were performed streaming and decoding music from the blob, but it was too slow and choppy.
 - The code also includes a quick port to the Dreamcast of the [PhysicsFS library](https://www.icculus.org/physfs/) which the games uses as its file system abstraction.
+
+Controls
+--------
+
+Input | Action
+--- | ---
+A button                                  | Flip/Accept  
+B button                                  | Exit/Cancel   
+START button                              | Pause         
+Dpad left / Analog stick left             | Move character/cursor to the left  
+Dpad right / Analog stick right           | Move character/cursor to the right 
+Dpad up or down / Analog stick up or down | Flip 
+
 
 How to Build
 ------------
