@@ -182,42 +182,48 @@ void vmuselectdelay() {
 }
 
 void vmuselectinput() {
+  static int prev_key = -1;
   if (vmu_saving == 0 ) {
     if (key.isDown(KEYBOARD_UP) || key.controllerWantsLeft(true)) {
-      uint8_t done = 0;
-      --vmu_selected_slot;
-      while (done == 0) {
-        if (vmu_selected_slot <= -1) {
-          vmu_selected_slot = -1;
-          done = 1;
-        } else {
-          if (vmu_slots[vmu_selected_slot] == 1) {
+      if (prev_key != KEYBOARD_UP) {
+        uint8_t done = 0;
+        while (done == 0) {
+          --vmu_selected_slot;
+          if (vmu_selected_slot <= -1) {
+            vmu_selected_slot = -1;
             done = 1;
           } else {
-            --vmu_selected_slot;
+            if (vmu_slots[vmu_selected_slot] == 1) {
+              done = 1;
+            }
           }
         }
       }
+      prev_key = KEYBOARD_UP;
     } else if (key.isDown(KEYBOARD_DOWN) || key.controllerWantsRight(true)) {
-      uint8_t done = 0;
-      int8_t prev = vmu_selected_slot;
-      ++vmu_selected_slot;
-      while (done == 0) {
-        if (vmu_selected_slot >= 8) {
-          vmu_selected_slot = prev;
-          done = 1;
-        } else {
-          if (vmu_slots[vmu_selected_slot] == 1) {
+      if (prev_key != KEYBOARD_DOWN) {
+        uint8_t done = 0;
+        int8_t prev = vmu_selected_slot;
+        while (done == 0) {
+          ++vmu_selected_slot;
+          if (vmu_selected_slot >= 8) {
+            vmu_selected_slot = prev;
             done = 1;
           } else {
-            ++vmu_selected_slot;
+            if (vmu_slots[vmu_selected_slot] == 1) {
+              done = 1;
+            }
           }
         }
       }
+      prev_key = KEYBOARD_DOWN;
     } else if (key.controllerButtonDown()) {
       vmu_saving = 3;  
+    } else {
+      prev_key = -1;
     }
   }
+  key.keymap.clear();
 }
 
 int vmuselectlogic() {
@@ -502,6 +508,7 @@ int main(int argc, char *argv[])
       vmuselectdelay();
       key.Poll();
       vmuselectinput();
+      key.keymap.clear();
       FillRect(graphics.backBuffer, 0x00000000);
       vmuselectrender();
       vmu_ret = vmuselectlogic();
