@@ -97,35 +97,11 @@ OBJS = ../../third_party/tinyxml/tinystr.o \
       ../src/WarpClass.o \
       ../src/editor.o \
       ../src/preloader.o \
-			aldc/src/alut.o \
-			aldc/src/context.o \
-			aldc/src/listener.o \
-			aldc/src/platform.o \
-			aldc/src/buffer.o \
-			aldc/src/core.o \
-			aldc/src/math.o \
-			aldc/src/source.o \
 			unistd_stub.o \
 			memory_stats.o \
 			inprint.o \
 			vvvvvvmu.o \
       ../src/main_dreamcast.o
-			#memcmp.o \
-			#memcpy.o \
-			#memmove.o \
-			#memset.o \
-			#SDL_memory.o \
-			#aldc/src/alut.o \
-			#aldc/src/context.o \
-			#aldc/src/listener.o \
-			#aldc/src/platform.o \
-			#aldc/src/buffer.o \
-			#aldc/src/core.o \
-			#aldc/src/math.o \
-			#aldc/src/source.o \
-			#aldc-legacy/AL/aldc.o \
-			#aldc-legacy/AL/mojoal.o \
-			#aldc-legacy/AL/alut.o \
 
 
 ifeq ($(USE_ROMDISK),1)
