@@ -32,6 +32,8 @@
 #include <time.h>
 #include <limits.h>
 
+#include <alloca.h>
+
 #include "physfs_internal.h"
 
 

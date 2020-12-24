@@ -1405,6 +1405,11 @@ void gamerender()
 {
 
     Uint32 time = SDL_GetTicks();
+    Uint32 time_entities = 0;
+    Uint32 time_backbuffer = 0;
+    Uint32 time_ui = 0;
+    Uint32 time_extra = 0;
+    Uint32 time_render = 0;
 
     if(!game.blackout)
     {
@@ -1427,6 +1432,7 @@ void gamerender()
         }
 
         time = SDL_GetTicks() - time;
+        time_entities = SDL_GetTicks();
 
         if(!game.completestop)
         {
@@ -1459,6 +1465,8 @@ void gamerender()
         graphics.drawentities();
     }
 
+    time_entities = SDL_GetTicks() - time_entities;
+    time_backbuffer = SDL_GetTicks();
 
     if(map.extrarow==0 || (map.custommode && map.roomname!=""))
     {
@@ -1505,7 +1513,13 @@ void gamerender()
     graphics.drawfade();
     BlitSurfaceStandard(graphics.backBuffer, NULL, graphics.tempBuffer, NULL);
 
+    time_backbuffer = SDL_GetTicks() - time_backbuffer;
+    time_ui = SDL_GetTicks();
+
     graphics.drawgui();
+    time_ui = SDL_GetTicks() - time_ui;
+    time_extra = SDL_GetTicks();
+
     if (graphics.flipmode)
     {
         if (game.advancetext) graphics.bprint(5, 228, "- Press ACTION to advance text -", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
@@ -1742,6 +1756,9 @@ void gamerender()
         graphics.flashlight();
     }
 
+    time_extra = SDL_GetTicks() - time_extra;
+    time_render = SDL_GetTicks();
+
     if (game.screenshake > 0 && !game.noflashingmode)
     {
         game.screenshake--;
@@ -1752,14 +1769,18 @@ void gamerender()
         graphics.render();
     }
 
+    time_render = SDL_GetTicks() - time_render;
+
     // GUSARBA: Uncomment these to get performance debug stats
-    /*
-    char tmprt[80] = {0};
-    sprintf(tmprt, "gamerender %d\0", time);
-    prepare_inline_font();
-    incolor(0xFF0000, 0x333333);
-    inprint(graphics.screenbuffer->m_window, tmprt, 10, 42);
-    */
+   
+    //char tmprt[80] = {0};
+    //sprintf(tmprt, "gamerender t %d e %d b %d u %d ex %d r %d\0", 
+    //        time, time_entities, time_backbuffer, time_ui, time_extra, 
+    //        time_render);
+    //prepare_inline_font();
+    //incolor(0xFF0000, 0x333333);
+    //inprint(graphics.screenbuffer->m_window, tmprt, 10, 42);
+    
 
 }
 

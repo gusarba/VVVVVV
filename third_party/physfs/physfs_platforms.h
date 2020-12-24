@@ -75,6 +75,7 @@
 #elif defined(DREAMCAST)
 #  define PHYSFS_PLATFORM_DREAMCAST 1
 //#  define PHYSFS_NO_CDROM_SUPPORT 1
+#include <alloca.h>
 #else
 #  error Unknown platform.
 #endif

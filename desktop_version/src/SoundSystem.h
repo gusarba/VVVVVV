@@ -3,6 +3,10 @@
 
 #ifndef DREAMCAST
 #include <SDL_mixer.h>
+#else
+#include <dc/sound/sfxmgr.h>
+//#include <AL/al.h>
+//#include <AL/alc.h>
 #endif
 
 class MusicTrack
@@ -25,10 +29,13 @@ public:
 	SoundTrack(const char* fileName);
 #ifndef DREAMCAST
 	Mix_Chunk *sound;
-#else
-  unsigned char *sound;
-#endif
   int size;
+#else
+  //unsigned char *sound;
+  //ALuint sound;
+  //ALsizei size;
+  sfxhnd_t sound;
+#endif
 };
 
 class SoundSystem

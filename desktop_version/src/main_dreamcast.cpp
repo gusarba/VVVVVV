@@ -35,15 +35,6 @@ extern "C"
 #include "SDL_inprint.h"
 }
 
-#ifndef DREAMCAST
-FILE _iob[] = { *stdin, *stdout, *stderr };
-
-extern "C" FILE * __cdecl __iob_func(void)
-{
-  return _iob;
-}
-#endif
-
 #include "memory_stats.h"
 
 #define FS_PREFIX "/cd"
@@ -66,6 +57,9 @@ kos_blockdev_t sd_dev;
 uint8 partition_type;
 DIR* d;
 struct dirent* entry;
+
+extern uint8_t romdisk[];
+KOS_INIT_ROMDISK(romdisk);
 
 void setup_sd() {
   if (sd_init()) {
@@ -370,7 +364,7 @@ int main(int argc, char *argv[])
       SDL_INIT_JOYSTICK); /* |
         SDL_INIT_GAMECONTROLLER
     );*/
-    
+
     print_ram_stats();
 
     //NETWORK_init();
@@ -631,7 +625,7 @@ int main(int argc, char *argv[])
         }else{
             if (timetaken < game.gameframerate)
             {
-                volatile Uint32 delay = game.gameframerate - timetaken;                
+                volatile Uint32 delay = game.gameframerate - timetaken;               
                 SDL_Delay( delay );
                 time = SDL_GetTicks();
             }
@@ -641,10 +635,11 @@ int main(int argc, char *argv[])
 
         elapsed += timetaken;
         static char tmpfps[32] = {"\0"};
+        float localfps = 1000.0f / (float)timetaken;
+        sprintf(tmpfps, "FPS = %f\0", localfps);
         if (elapsed >= 1000) {
           float fps = ((float)(framecounter - last_frame) / (float)elapsed) * 1000.0f;
-          printf("FPS = %f\n", fps);
-          sprintf(tmpfps, "FPS = %f\0", fps);
+          printf("FPS = %.3f\n", fps);
           elapsed = 0;
           last_frame = framecounter;
         }
@@ -853,17 +848,17 @@ int main(int argc, char *argv[])
         game.gameclock();
 
         // GUSARBA: Uncomment these to get performance debug prints
-        /*
-        prepare_inline_font();
-        incolor(0xFF0000, 0x333333);
-        inprint(gameScreen.m_window, tmpfps, 10, 18);
-        char tmprt[80] = {0};
-        sprintf(tmprt, "it %f rt %f lt %f\0", input_time, render_time, logic_time);
-        inprint(gameScreen.m_window, tmprt, 10, 26);
-        char tmpmus[80] = {0};
-        sprintf(tmpmus, "mix_next %d mix_volume %d\0", mix_next, mix_volume);
-        inprint(gameScreen.m_window, tmpmus, 10, 34);
-        */
+         
+        //prepare_inline_font();
+        //incolor(0xFF0000, 0x333333);
+        //inprint(gameScreen.m_window, tmpfps, 10, 18);
+        //char tmprt[80] = {0};
+        //sprintf(tmprt, "it %.3f rt %.3f lt %.3f\0", input_time, render_time, logic_time);
+        //inprint(gameScreen.m_window, tmprt, 10, 26);
+        //char tmpmus[80] = {0};
+        //sprintf(tmpmus, "mix_next %d mix_volume %d\0", mix_next, mix_volume);
+        //inprint(gameScreen.m_window, tmpmus, 10, 34);
+        
 
         gameScreen.FlipScreen();
     }

@@ -183,7 +183,8 @@ void Game::init(void)
     colourblindmode = false;
     noflashingmode = false;
     slowdown = 30;
-    gameframerate=34;
+    //gameframerate=34;
+    gameframerate=1;
 
     fullscreen = false;// true; //Assumed true at first unless overwritten at some point!
     stretchMode = 0;

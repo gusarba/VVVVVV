@@ -10,10 +10,12 @@
 struct SFX_t {
   //snd_stream_hnd_t shnd;
   SoundTrack* t;
-  kthread_t* thread;
-  int pos;
+  //kthread_t* thread;
+  //int pos;
 };
-static SFX_t SFX[32];
+const Uint8 kMaxSources = 4;
+static SFX_t SFX[kMaxSources];
+static Uint8 current_source = 0; 
 #define FS_PREFIX "/cd"
   #if defined(FS_PREFIX_PC)
   #define FS_PREFIX "/pc/VVVVVV/desktop_version/dc/romdisk/"
@@ -22,7 +24,6 @@ static SFX_t SFX[32];
   #elif defined(FS_PREFIX_CD)
   #define FS_PREFIX "/cd"
   #endif
-
 
 /*
 * Struct that holds the RIFF data of the Wave file.
@@ -58,15 +59,19 @@ struct WAVE_Data {
 };
 
 // Variables for streaming music
-static file_t soundFile = NULL;
+static file_t soundFile = 0;
 
-int8_t mix_fading_out = -1;  // -1 = FadingIn , +1 = Fading Out , 0 = Nothing
-int mix_fading_ms = -1;
+int8_t mix_fading_out = 0;  // -1 = FadingIn , +1 = Fading Out , 0 = Nothing
+int mix_fading_ms = 0;
 uint8_t mix_playing_music = 0;
 int mix_volume = 15;
+int mix_volume_prev = mix_volume;
 int mix_loops = -1;
 int mix_next = -1;
+// float version of musicVolume that runs from 0.0f to 1024.0f (8x)
+float fmusicVolume = 1024.0f;
 
+#if 0
 int LoadWavFile(const char* filename,
     int* size, int* frequency) {
   WAVE_Format wave_format;
@@ -186,13 +191,32 @@ int stream_loop() {
   
   return 0;
 }
+#endif
+
+#define TEST_ERROR(_msg)    \
+  error = alGetError();   \
+  if (error != AL_NO_ERROR) { \
+    fprintf(stderr, "ERROR: "); \
+    fprintf(stderr, _msg "\n"); \
+  }
+    //return -1;    \
+  
+
+//int channel = -1;
 
 void musicclass::init()
 {
+  snd_init();
+
+  //channel = snd_sfx_chn_alloc();
+  //printf("Channel %d\n", channel);
+
+  /*
   int rc = snd_stream_init();
   if(rc != 0) {
     printf("musicclass: Error initializing the stream!!\n");
   }
+  */
   
 	soundTracks.push_back(SoundTrack( "sounds/jump.wav" ));
 	soundTracks.push_back(SoundTrack( "sounds/jump2.wav" ));
@@ -221,7 +245,8 @@ void musicclass::init()
 	soundTracks.push_back(SoundTrack( "sounds/combine.wav" ));
 	soundTracks.push_back(SoundTrack( "sounds/newrecord.wav" ));
 	soundTracks.push_back(SoundTrack( "sounds/trophy.wav" ));
-	soundTracks.push_back(SoundTrack( "sounds/rescue.wav" ));
+	//soundTracks.push_back(SoundTrack( "sounds/rescue.wav" ));
+	soundTracks.push_back(SoundTrack( "/rd/rescueA.wav" ));
   
     
   print_ram_stats();
@@ -252,15 +277,10 @@ void musicclass::init()
 
   print_ram_stats();
 
-  for (int i = 0; i < 32; ++i) {
-    SFX[i].t = NULL;
-    SFX[i].thread = NULL;
-    SFX[i].pos = 0;
-  }
-
 	safeToProcessMusic= false;
 	m_doFadeInVol = false;
 	musicVolume = 128;
+  fmusicVolume = 1024.0f;
 	FadeVolAmountPerFrame = 0;
 
 	custompd = false;
@@ -279,6 +299,7 @@ void musicclass::init()
 void musicclass::play(int t)
 {
   printf("#####\nmusicclass::play %d\n#####\n", t);
+
 	t = (t % 16);
 
 	if(mmmmmm)
@@ -291,7 +312,7 @@ void musicclass::play(int t)
 	safeToProcessMusic = true;
 	//Mix_VolumeMusic(128);
   mix_volume = 15;
-  spu_cdda_volume(15, 15);
+  spu_cdda_volume(mix_volume, mix_volume);
 	if (currentsong !=t)
 	{
 		if (t != -1)
@@ -311,7 +332,7 @@ void musicclass::play(int t)
         */
         mix_playing_music = 1;
         printf("Playing CD track %d\n", mix_next+1);
-        if (cdrom_cdda_play(mix_next+1, mix_next+1, 15, CDDA_TRACKS) != ERR_OK) 
+        if (cdrom_cdda_play(mix_next+1, mix_next+1, 1, CDDA_TRACKS) != ERR_OK) 
         {
 					printf("cdrom_cdda_play failed: %d\n", mix_next+1);
           mix_playing_music = 0;
@@ -335,6 +356,10 @@ void musicclass::play(int t)
 				else 
 				{
 					//printf("Mix_FadeInMusic: %s\n", Mix_GetError());
+          mix_volume = 0;
+          musicVolume = 0;
+          fmusicVolume = 0.0f;
+          spu_cdda_volume(mix_volume, mix_volume);
           mix_fading_out = -1;
           mix_next = t;
           mix_loops = -1;
@@ -372,37 +397,52 @@ void musicclass::silencedasmusik()
   mix_volume = 0;
   spu_cdda_volume(0, 0);
 	musicVolume = 0;
+  fmusicVolume = 0.0f;
 }
 
 void musicclass::fadeMusicVolumeIn(int ms)
 {
+  printf("musicclass::fadeMusicVolumeIn %d ms\n", ms);
 	m_doFadeInVol = true;
 	//FadeVolAmountPerFrame =  MIX_MAX_VOLUME / (ms / 33);
-	FadeVolAmountPerFrame =  15 / (ms / 33);
-  mix_volume = 15;
-  spu_cdda_volume(15, 15);
+  if (ms != 0) FadeVolAmountPerFrame =  128 / (ms / 33);
+  else FadeVolAmountPerFrame = 128;
+  //mix_volume = 15;
+  //spu_cdda_volume(mix_volume, mix_volume);
+  musicVolume = 0;
+  fmusicVolume = 0.0f;
+  mix_volume = 0;
 }
 
 void musicclass::fadeout()
 {
+  printf("musicclass::fadeout\n");
 	//Mix_FadeOutMusic(2000);
-  mix_playing_music = 0;
-  cdrom_cdda_pause();
+  //mix_playing_music = 0;
+  //cdrom_cdda_pause();
   mix_fading_out = 1;
   mix_fading_ms = 2000;
-	currentsong = -1;
+	//currentsong = -1;
+  mix_volume = 15;
+  musicVolume = 128;
+  fmusicVolume = 1024.0f;
 }
 
 void musicclass::processmusicfadein()
 {
+  printf("musicclass::processmusicfadein\n");
 	musicVolume += FadeVolAmountPerFrame;
 	//Mix_VolumeMusic(musicVolume);
+  if (musicVolume > 128) musicVolume = 128;
   
-  //mix_volume = musicVolume;
-  //spu_cdda_volume(mix_volume, mix_volume);
+  mix_volume_prev = mix_volume;
+
+  mix_volume = musicVolume / 8;
+  // Prevent frequent calls to spu_cdda_volume
+  if (mix_volume != mix_volume_prev) spu_cdda_volume(mix_volume, mix_volume);
 
 	//if (musicVolume >= MIX_MAX_VOLUME)
-	if (musicVolume >= 15)
+	if (musicVolume >= 128)
 	{
 		m_doFadeInVol = false;
 	}
@@ -435,46 +475,72 @@ void musicclass::processmusic()
 
   // Actual processing of mix variables
   if (mix_fading_out == 1) {  // FadingOut
-	  /*
-    int fade_amount =  mix_volume / (mix_fading_ms / 33);
-    mix_volume -= fade_amount;
+	
+    printf("Fading out...\n");  
+    float fade_amount = 1.0f;
+    if (mix_fading_ms != 0) fade_amount = 1024.0f / (mix_fading_ms / 33);
+    fmusicVolume -= fade_amount;
+    musicVolume = (int)(fmusicVolume / 8.0f);
+    printf("musicVolume %d\n", musicVolume);
+    mix_volume_prev = mix_volume;
+    mix_volume = musicVolume / 8;
     if (mix_volume < 0) mix_volume = 0;
-    spu_cdda_volume(mix_volume, mix_volume);
+    if (mix_volume != mix_volume_prev) spu_cdda_volume(mix_volume, mix_volume);
     mix_fading_ms -= 33;
+    printf("mix_fading_ms %d\n", mix_fading_ms);
     if (mix_fading_ms <= 0) {
-       mix_fading_ms = 0;
-       mix_fading_out = 0;
+      mix_fading_ms = 0;
+      mix_fading_out = 0;
+      mix_playing_music = 0;
+      cdrom_cdda_pause();
+      mix_volume = 0;
+      musicVolume = 0;
+      fmusicVolume = 0.0f;
+      /*
+      if (mix_next > -1) {
+        // Music CD tracks start in 1
+        mix_playing_music = 1;
+        mix_volume = 15;
+        musicVolume = 128;
+        fmusicVolume = 1024.0f;
+        spu_cdda_volume(mix_volume, mix_volume);
+        cdrom_cdda_play(mix_next+1, mix_next+1, 15, CDDA_TRACKS);
+        printf("Playing CD track %d\n", mix_next+1);
+        printf("Playing CD track %d\n", mix_next+1);
+        printf("Playing CD track %d\n", mix_next+1);
+      }
+      */
     }
-    */
-    mix_playing_music = 0;
-    cdrom_cdda_pause();
-    mix_fading_out = 0;
-    if (mix_next > -1) {
-      // Music CD tracks start in 1
-      mix_playing_music = 1;
-      cdrom_cdda_play(mix_next+1, mix_next+1, 15, CDDA_TRACKS);
-      printf("Playing CD track %d\n", mix_next+1);
-      printf("Playing CD track %d\n", mix_next+1);
-      printf("Playing CD track %d\n", mix_next+1);
-    }
+    
   } else if (mix_fading_out == -1) {  // FadingIn
-    /*
-	  int fade_amount =  mix_volume / (mix_fading_ms / 33);
-    mix_volume += fade_amount;
+    
+    printf("Fading in...\n");  
+    float fade_amount = 1.0f;
+    if (mix_fading_ms != 0) fade_amount = 1024.0f / (mix_fading_ms / 33);
+    fmusicVolume += fade_amount;
+    musicVolume = (int)(fmusicVolume / 8.0f);
+    printf("musicVolume %d\n", musicVolume);
+    mix_volume_prev = mix_volume;
+    mix_volume = musicVolume / 8;
     if (mix_volume > 15) mix_volume = 15;
-    spu_cdda_volume(mix_volume, mix_volume);
-    mix_fading_ms -= 33;
-    if (mix_fading_ms <= 0) {
-       mix_fading_ms = 0;
-       mix_fading_out = 0;
+    if (mix_volume != mix_volume_prev) {
+      printf("spu_cdda_volume %d", mix_volume);
+      spu_cdda_volume(mix_volume, mix_volume);
+      printf(" ...done\n");
     }
-    */
-    mix_volume = 15;
-    spu_cdda_volume(mix_volume, mix_volume);
-    mix_fading_out = 0;
+    mix_fading_ms -= 33;
+    printf("mix_fading_ms %d\n", mix_fading_ms);
+    if (mix_fading_ms <= 0) {
+      mix_fading_ms = 0;
+      mix_fading_out = 0;
+      musicVolume = 128;
+      fmusicVolume = 1024.0f;
+      mix_volume = 15;
+    }
+    
   }
 
-  stream_loop();
+  //stream_loop();
 }
 
 
@@ -532,5 +598,12 @@ void musicclass::changemusicarea(int x, int y)
 
 void musicclass::playef(int t)
 {
-  stream_setup((void*)&soundTracks[t]);
+  //stream_setup((void*)&soundTracks[t]);
+  static int pan = 0;
+  int ret = -1;
+  //ret = snd_sfx_play_chn(channel, soundTracks[t].sound, 254, pan);
+  ret = snd_sfx_play(soundTracks[t].sound, 254, pan);
+  printf("musicclass::playef %d %d %d\n", t, soundTracks[t] , ret);
+  if (pan == 0) pan = 255;
+  if (pan == 255) pan = 0;
 }

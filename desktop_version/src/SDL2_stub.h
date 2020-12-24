@@ -18,11 +18,11 @@ typedef struct {
 } SDL_JoystickGUID;
 typedef Sint32 SDL_JoystickID;
 
-// Uncomment these if you are using Chui's SDL port
+// Uncomment these if you are using Chui's SDL-1.2.9 port
 //#define SDL_CONTROLLERBUTTONDOWN SDL_JOYBUTTONUP
 //#define SDL_CONTROLLERBUTTONUP SDL_JOYBUTTONDOWN
 
-// Uncomment these if you are using kos-ports (Bero's) SDL
+// Uncomment these if you are using kos-ports (Bero's) SDL or SDL-1.2.13
 #define SDL_CONTROLLERBUTTONDOWN SDL_JOYBUTTONDOWN
 #define SDL_CONTROLLERBUTTONUP SDL_JOYBUTTONUP
 
@@ -355,6 +355,7 @@ extern "C" {
   typedef enum
   {
     // Uncomment these if you are using kos-ports (Bero's) SDL    
+    /* 
     SDL_CONTROLLER_BUTTON_INVALID = -1,
     SDL_CONTROLLER_BUTTON_A,
     SDL_CONTROLLER_BUTTON_B,
@@ -372,9 +373,10 @@ extern "C" {
     SDL_CONTROLLER_BUTTON_DPAD_DOWN,
     SDL_CONTROLLER_BUTTON_DPAD_LEFT,    
     SDL_CONTROLLER_BUTTON_MAX
-    
+    */
+
     // Uncomment these if you are using Chui's SDL port
-    /*
+    
     SDL_CONTROLLER_BUTTON_INVALID = -1,
     SDL_CONTROLLER_BUTTON_GUIDE,
     SDL_CONTROLLER_BUTTON_B = 1,
@@ -392,7 +394,7 @@ extern "C" {
     SDL_CONTROLLER_BUTTON_LEFTSTICK,
     SDL_CONTROLLER_BUTTON_RIGHTSTICK,
     SDL_CONTROLLER_BUTTON_MAX
-    */
+    
   } SDL_GameControllerButton;
 
   /**

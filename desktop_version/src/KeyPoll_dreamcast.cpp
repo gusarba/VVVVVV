@@ -186,6 +186,11 @@ void KeyPoll::Poll()
 
     // GUSARBA: Joystick Hat
     else if (evt.type == SDL_JOYHATMOTION) {
+      printf("HAT %x", evt.jhat.value); 
+      // Uncomment this if you are using Chui's SDL-1.2.13
+      //evt.jhat.value = ~evt.jhat.value;
+      printf("HAT %x", evt.jhat.value); 
+
       printf("Joystick %d hat %d value:", evt.jhat.which, evt.jhat.hat);
       if (evt.jhat.value == SDL_HAT_CENTERED) {
         printf(" centered");
@@ -197,23 +202,23 @@ void KeyPoll::Poll()
         keymap[SDLK_UP] = false;
         keymap[SDLK_DOWN] = false;
       }
-      if (evt.jhat.value & SDL_HAT_UP) {
+      else if (evt.jhat.value & SDL_HAT_UP) {
         printf(" up");
         buttonmap[SDL_CONTROLLER_BUTTON_DPAD_UP] = true;
         // GUSARBA: Ugly hack to not mess around too much with Game.cpp
         keymap[SDLK_UP] = true;
       }
-      if (evt.jhat.value & SDL_HAT_RIGHT) {
+      else if (evt.jhat.value & SDL_HAT_RIGHT) {
         printf(" right");
         buttonmap[SDL_CONTROLLER_BUTTON_DPAD_RIGHT] = true;
       }
-      if (evt.jhat.value & SDL_HAT_DOWN) {
+      else if (evt.jhat.value & SDL_HAT_DOWN) {
         printf(" down");
         buttonmap[SDL_CONTROLLER_BUTTON_DPAD_DOWN] = true;
         // GUSARBA: Ugly hack to not mess around too much with Game.cpp
         keymap[SDLK_DOWN] = true;
       }
-      if (evt.jhat.value & SDL_HAT_LEFT) {
+      else if (evt.jhat.value & SDL_HAT_LEFT) {
         printf(" left");
         buttonmap[SDL_CONTROLLER_BUTTON_DPAD_LEFT] = true;
       }

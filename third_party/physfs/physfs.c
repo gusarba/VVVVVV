@@ -40,6 +40,7 @@ int __PHYSFS_msvc_snprintf(char *outBuf, size_t size, const char *format, ...)
 }
 #endif
 
+#include <alloca.h>
 
 typedef struct __PHYSFS_DIRHANDLE__
 {
