@@ -4,10 +4,12 @@ The port is far from perfect and there are still a lot of bugs and room for impr
 
 - Backported all the SDL calls from the 2.0 API to the old 1.2 API. It incluides a simple "SDL2_stub.h" header file with some glue code.
 - Instead of alpha-blending the SDL surfaces, color keying is used, which had a dramatic impact on performance, since all the blitting is done in software by the Dreamcast's SH4 processor.
-- The game runs at around 24/30 FPS most of the time.
+- The game runs at around 30/40 FPS most of the time.
 - Saving and loading to the VMU is implemented, as well as a new small menu screen when booting the game to select which VMU to use (or to not save at all).
 - All the music system has been changed to use CDDA audio tracks instead of a binary blob file (which cointains Ogg/Vorbis files). Numerous tests were performed streaming and decoding music from the blob, but it was too slow and choppy.
 - The code also includes a quick port to the Dreamcast of the [PhysicsFS library](https://www.icculus.org/physfs/) which the games uses as its file system abstraction.
+- Newer versions of the port make use of a 'lost' SDL-1.2.13 version made by [Chui][http://chui.dcemu.co.uk] and recovered by [Ian Micheal][https://github.com/ianmicheal] to improve performance.
+- Also to improve performance, the memcpy routines of moopthehedgehog's [DreamHAL][https://github.com/sega-dreamcast/dreamhal] library are also used. Big thanks to Ian for suggesting these improvements!
 
 Controls
 --------
